@@ -93,6 +93,7 @@ class AttachCaptions extends PluginAbstract
 		Plugin::attachEvent('theme.head', array(__CLASS__, 'addMetaTag'));
 		Plugin::attachEvent('theme.head', array(__CLASS__, 'load_styles'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'set_default_caption'));
+		Plugin::attachEvent('upload_info.post_encode', array(__CLASS__, 'set_default_caption'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'save_caption_language'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'cleanup_deleted_meta'));
 		Plugin::attachEvent('videos.edit.attachment.list', array(__CLASS__, 'edit_default_captions'));
@@ -119,6 +120,20 @@ class AttachCaptions extends PluginAbstract
 	{
 		echo '<meta name="attachcaptions" content="true" />';
 	}
+
+	/**
+   * Get Video object based on uploaded video in _SESSION
+   * 
+   */
+  public static function getUploadedVideo()
+  {
+    $videoMapper = new VideoMapper();
+    if (isset($_SESSION['upload']->videoId)) {
+      $video_id = $_SESSION['upload']->videoId;
+      $video = $videoMapper->getVideoById($video_id);
+      return $video;
+    }
+  }
 
 	/**
 	 * Add CSS stylesheet to head
@@ -173,31 +188,41 @@ class AttachCaptions extends PluginAbstract
 		$fileMapper = new FileMapper();
 		$file = $fileMapper->getById($file_id);
 		$link = "";
+		$disabled = "";
+		$tooltip = "";
+		$class = "";
+		$fileId = "";
 		//if it's a caption file
-		if (AttachCaptions::is_caption_file($file)) {
-			// Retrieve the default caption if set
-			$video_meta = AttachCaptions::get_video_meta($video_id, 'default_caption');
-			if ($video_meta) {
-				$default_caption = $video_meta->meta_value;
-			} else {
-				$default_caption = 0;
-			}
-
-			// Set form status if this is the default caption 
-			if ($file->fileId == $default_caption) {
-				$checked = "checked";
-			} else {
-				$checked = "";
-			}
-			$link .= '<div class="pt-2 custom-control custom-radio attach-captions-toggle attach-captions-control"><input type="radio" id="default-caption-input-' . $file->fileId . '" class="custom-control-input" name="default_caption" value="' . $file->fileId . '" ' . $checked . '> <label class="custom-control-label default-caption" for="default-caption-input-' . $file->fileId . '">Make this the default caption.</label></div>';
-
-			$language = AttachCaptions::get_caption_language($file->fileId);
-			$languages = AttachCaptions::language_list(true);
-			$link .= include 'select-language-form.php';
+		if ($file) {
+				$fileId = $file->fileId;
+		} else {
+			$tooltip = ' data-toggle="tooltip" data-placement="left"  title="Cannot configure new caption until after video is saved/uploaded." tabindex="0"';
+			$disabled = ' style="pointer-events: none;" disabled';
+			$class = ' temp-custom-thumb';
 		}
+			if (AttachCaptions::is_caption_file($file)) {
+				// Retrieve the default caption if set
+				$video_meta = AttachCaptions::get_video_meta($video_id, 'default_caption');
+				if(isset($_POST['default_caption'])){
+				$posted_cap = intval($_POST['default_caption']);
+				} else{
+					$posted_cap = 0;
+				}
+				$existing_meta = ($video_meta) ? $video_meta->meta_value : null;
+				if ($fileId == $existing_meta || $posted_cap == intval($fileId)) {
+					$checked = " checked";
+				} else {
+					$checked = "";
+				}
+		$link .= '<div class="pt-2 custom-control custom-radio attach-captions-toggle attach-captions-control' . $class . '"' . $tooltip . '><input type="radio" id="default-caption-input-' . $fileId . '" class="custom-control-input" name="default_caption" value="' . $fileId . '"' . $disabled . $checked . '> <label class="custom-control-label default-caption" for="default-caption-input-' . $fileId . '">Make this the default caption.</label></div>';
 
+		$language = AttachCaptions::get_caption_language($fileId);
+		$languages = AttachCaptions::language_list(true);
+		$link .= include 'select-language-form.php';
 		echo $link;
+			}
 	}
+
 
 	/**
 	 * Print a template for JS loading of the caption/language form.
@@ -220,10 +245,14 @@ class AttachCaptions extends PluginAbstract
 	{
 		if (isset($_POST['default_caption'])) {
 			$file_id = $_POST['default_caption'];
-			$attachmentMapper = new AttachmentMapper();
-			$attachment = $attachmentMapper->getByCustom(array("file_id" => $file_id));
+			if (isset($_GET['vid'])) {
+				$videoId = $_GET['vid'];
+			} else {
+				$file = AttachCaptions::getUploadedVideo();
+				$videoId = $file->videoId;
+			}
 
-			AttachCaptions::update_video_meta($attachment->videoId, 'default_caption', $file_id);
+			AttachCaptions::update_video_meta($videoId, 'default_caption', $file_id);
 		}
 	}
 

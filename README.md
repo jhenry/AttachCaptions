@@ -4,6 +4,8 @@ This is a plugin to allow users to upload and attach .vtt and .srt files to thei
 
 # Installation
 
+Use of this plugin generally assumes that you are also running the [overcast](https://github.com/jhenry/overcast) theme. If not, the below instructions are intended as a starter, but will not likely get you all the way without a deeper dive into the plugin load methods, etc. 
+
 ## Adding a trigger to the Attachments area of the video editor
 
 After installing, you will need to place the relevant code into your theme.  For example, you might start around line 99 of the default theme file account/videos_edit.phtml.  Adding the following trigger there allows the plugin to format attachment form elements as needed:
