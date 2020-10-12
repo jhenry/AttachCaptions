@@ -1,0 +1,16 @@
+<?php ob_start(); ?>
+<script id="caption-form-template" type="text/x-jsrender">
+<div class="pt-2 custom-control custom-radio attach-captions-toggle">
+  <input type="radio" id="default-caption-{{:file}}" name="default_caption" value="{{:file}}" class="custom-control-input"> <label class="custom-control-label" for="default-caption-{{:file}}">Use as caption.</label>
+</div>
+<div class="subtitle-language-block"><label for="caption_language[{{:file}}]">Set the language</label>: <select name="caption_language[{{:file}}]" class="form-control custom-select subtitle-language">
+	    <?php foreach ((array) $languages as $key => $value): ?>
+		    <option value="<?=$key?>"<?=(isset ($language) && $language == $key) ? ' selected' : '' ?>><?=$value?></option>
+	    <?php endforeach; ?>
+	</select>
+</div>
+</script>
+<?php 
+$language_selector = ob_get_clean(); 
+return $language_selector;
+?>
