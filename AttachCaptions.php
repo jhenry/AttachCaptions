@@ -189,7 +189,7 @@ class AttachCaptions extends PluginAbstract
 			} else {
 				$checked = "";
 			}
-			$link .= '<p class="set-default-caption"><input type="radio" name="default_caption" value="' . $file->fileId . '" ' . $checked . '> <label class="control-label default-caption" for="default-caption">Make this the default caption.</label></p>';
+			$link .= '<div class="pt-2 custom-control custom-radio attach-captions-toggle attach-captions-control"><input type="radio" id="default-caption-input-' . $file->fileId . '" class="custom-control-input" name="default_caption" value="' . $file->fileId . '" ' . $checked . '> <label class="custom-control-label default-caption" for="default-caption-input-' . $file->fileId . '">Make this the default caption.</label></div>';
 
 			$language = AttachCaptions::get_caption_language($file->fileId);
 			$languages = AttachCaptions::language_list(true);
