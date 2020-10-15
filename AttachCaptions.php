@@ -343,7 +343,11 @@ class AttachCaptions extends PluginAbstract
 	public static function get_caption_language($file_id)
 	{
 		$meta = AttachCaptions::get_file_meta($file_id, 'language');
-		return $meta->meta_value;
+		if($meta) {
+			return $meta->meta_value;
+		} else {
+			return Settings::get('default_language');
+		}
 	}
 
 	/**
