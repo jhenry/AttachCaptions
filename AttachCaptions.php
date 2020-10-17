@@ -254,6 +254,23 @@ class AttachCaptions extends PluginAbstract
 
 			AttachCaptions::update_video_meta($videoId, 'default_caption', $file_id);
 		}
+		else {
+			// If the form was submitted, but no thumbnail is 
+			// set as the default, delete the meta row
+			if($_SERVER['REQUEST_METHOD'] === 'POST'){
+				if (isset($_GET['vid'])) {
+					$videoId = $_GET['vid'];
+				} else {
+					$file = AttachCaptions::getUploadedVideo();
+					$videoId = $file->videoId;
+				}		
+				$videoMeta = AttachCaptions::get_video_meta($videoId, 'caption');
+				include_once 'VideoMetaMapper.php';
+				$videoMetaMapper = new VideoMetaMapper();
+
+				$videoMetaMapper->delete($videoMeta->meta_id);
+			}
+		}
 	}
 
 	/**
