@@ -248,8 +248,8 @@ class AttachCaptions extends PluginAbstract
 			if (isset($_GET['vid'])) {
 				$videoId = $_GET['vid'];
 			} else {
-				$file = AttachCaptions::getUploadedVideo();
-				$videoId = $file->videoId;
+				$v = AttachCaptions::getUploadedVideo();
+				$videoId = $v->videoId;
 			}
 
 			AttachCaptions::update_video_meta($videoId, 'default_caption', $file_id);
@@ -261,14 +261,19 @@ class AttachCaptions extends PluginAbstract
 				if (isset($_GET['vid'])) {
 					$videoId = $_GET['vid'];
 				} else {
-					$file = AttachCaptions::getUploadedVideo();
-					$videoId = $file->videoId;
+					$vid = AttachCaptions::getUploadedVideo();
+					$videoId = $vid->videoId;
 				}		
-				$videoMeta = AttachCaptions::get_video_meta($videoId, 'caption');
-				include_once 'VideoMetaMapper.php';
-				$videoMetaMapper = new VideoMetaMapper();
 
-				$videoMetaMapper->delete($videoMeta->meta_id);
+				// Only try delete if there's an actual entry to delete
+				$videoMeta = AttachCaptions::get_video_meta($videoId, 'caption');
+				if ($videoMeta)
+				{
+					include_once 'VideoMetaMapper.php';
+					$videoMetaMapper = new VideoMetaMapper();
+
+					$videoMetaMapper->delete($videoMeta->meta_id);
+				}
 			}
 		}
 	}
