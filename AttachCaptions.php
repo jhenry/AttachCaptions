@@ -94,7 +94,8 @@ class AttachCaptions extends PluginAbstract
 		Plugin::attachEvent('theme.head', array(__CLASS__, 'load_styles'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'set_default_caption'));
 		Plugin::attachEvent('upload_info.post_encode', array(__CLASS__, 'set_default_caption'));
-		Plugin::attachEvent('upload_info.end', array(__CLASS__, 'setDefaultCaptionOnSave'));
+		Plugin::attachEvent('upload_info.post_encode', array(__CLASS__, 'setDefaultCaptionOnSave'));
+		Plugin::attachEvent('videos_edit.end', array(__CLASS__, 'setDefaultCaptionOnSave'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'save_caption_language'));
 		Plugin::attachEvent('videos_edit.start', array(__CLASS__, 'cleanup_deleted_meta'));
 		Plugin::attachEvent('videos.edit.attachment.list', array(__CLASS__, 'edit_default_captions'));
@@ -128,12 +129,13 @@ class AttachCaptions extends PluginAbstract
 	 */
 	public static function setDefaultCaptionOnSave()
 	{
-		$videoId = (isset($_GET['vid'])) ? $_GET['vid'] : self::getUploadedVideo();
+		$videoId = (isset($_GET['vid'])) ? $_GET['vid'] : $_SESSION['upload']->videoId;
 		$captions = self::get_all_captions($videoId);
+
 		// If there is only one caption attached, set it as default
 		if (sizeof($captions) == 1) {
 			$caption = $captions[0];
-			self::update_video_meta($videoId, 'caption', $caption->fileId);
+			self::update_video_meta($videoId, 'default_caption', $caption->fileId);
 		}
 
 	}
