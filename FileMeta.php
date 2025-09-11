@@ -20,5 +20,11 @@ class FileMeta extends Model
     /**
      * @var string
      */
+    public $meta_id;
+
+
+    /**
+     * @var string
+     */
     public $meta_value;
 }
