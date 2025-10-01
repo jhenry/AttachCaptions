@@ -507,7 +507,13 @@ class AttachCaptions extends PluginAbstract
 		//TODO: move to plugin settings
 		$valid_captions = array('vtt', 'srt');
 
-		return in_array($file->extension, $valid_captions);
+        //TODO: exception handling 
+        if (!($file === false)) {
+          return in_array($file->extension, $valid_captions);
+        }
+        else {
+          return false;
+        }
 	}
 
 	/**
